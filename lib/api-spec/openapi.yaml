@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: inference
+    description: Local object detection inference
+  - name: evaluation
+    description: Evaluation examples and observations
 paths:
   /healthz:
     get:
@@ -24,6 +28,65 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /inference:
+    post:
+      operationId: runInference
+      tags: [inference]
+      summary: Run local object detection
+      description: Runs a pretrained Ultralytics YOLO model locally against an uploaded image.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/InferenceInput"
+      responses:
+        "200":
+          description: Detection result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InferenceResult"
+        "400":
+          description: Invalid upload or confidence threshold
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Inference failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /evaluation/examples:
+    get:
+      operationId: listEvaluationExamples
+      tags: [evaluation]
+      summary: List evaluation examples
+      description: Returns the seven prepared examples and their expected objects and observed error notes.
+      responses:
+        "200":
+          description: Evaluation examples
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EvaluationExample"
+  /evaluation/summary:
+    get:
+      operationId: getEvaluationSummary
+      tags: [evaluation]
+      summary: Get evaluation summary
+      description: Returns a compact summary of the prepared evaluation set.
+      responses:
+        "200":
+          description: Evaluation summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluationSummary"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +96,107 @@ components:
           type: string
       required:
         - status
+    BoundingBox:
+      type: object
+      properties:
+        x1:
+          type: number
+        y1:
+          type: number
+        x2:
+          type: number
+        y2:
+          type: number
+      required: [x1, y1, x2, y2]
+    Detection:
+      type: object
+      properties:
+        class_id:
+          type: integer
+        class_name:
+          type: string
+        confidence:
+          type: number
+        box:
+          $ref: "#/components/schemas/BoundingBox"
+      required: [class_id, class_name, confidence, box]
+    InferenceInput:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+        confidence_threshold:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.25
+      required: [file]
+    InferenceResult:
+      type: object
+      properties:
+        filename:
+          type: string
+        image_width:
+          type: integer
+        image_height:
+          type: integer
+        model_name:
+          type: string
+        confidence_threshold:
+          type: number
+        inference_time_ms:
+          type: number
+        detections:
+          type: array
+          items:
+            $ref: "#/components/schemas/Detection"
+      required:
+        - filename
+        - image_width
+        - image_height
+        - model_name
+        - confidence_threshold
+        - inference_time_ms
+        - detections
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+      required: [error]
+    EvaluationExample:
+      type: object
+      properties:
+        id:
+          type: string
+        filename:
+          type: string
+        title:
+          type: string
+        expected_objects:
+          type: array
+          items:
+            type: string
+        observed_errors:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+      required: [id, filename, title, expected_objects, observed_errors, notes]
+    EvaluationSummary:
+      type: object
+      properties:
+        total_examples:
+          type: integer
+        prepared_examples:
+          type: integer
+        model_name:
+          type: string
+        evaluation_note:
+          type: string
+      required: [total_examples, prepared_examples, model_name, evaluation_note]
 
