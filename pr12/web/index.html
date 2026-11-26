@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PR12 — панель оцінювання</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17231d;
+      --muted: #64736a;
+      --line: #dce5de;
+      --surface: #fff;
+      --bg: #f3f7f3;
+      --green: #18764b;
+      --green-dark: #105b38;
+      --red: #b43b35;
+      --amber: #92630d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font: 15px/1.5 "Segoe UI", system-ui, sans-serif;
+    }
+    header {
+      color: white;
+      background: #153b2a;
+      padding: 28px max(24px, calc((100% - 1120px) / 2));
+    }
+    header h1 { margin: 0; font-size: 25px; }
+    header p { margin: 6px 0 0; color: #c4d9cb; }
+    main { max-width: 1120px; margin: 28px auto; padding: 0 20px 50px; }
+    .layout { display: grid; grid-template-columns: 330px 1fr; gap: 20px; align-items: start; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 14px #183a2610;
+    }
+    h2 { font-size: 17px; margin: 0 0 14px; }
+    label { display: block; font-weight: 600; margin: 15px 0 6px; }
+    select, input[type="number"] {
+      width: 100%; padding: 10px 11px; border: 1px solid #cbd8ce;
+      background: white; border-radius: 7px; color: var(--ink); font: inherit;
+    }
+    .check { display: flex; gap: 9px; align-items: flex-start; font-weight: 400; }
+    .check input { margin-top: 5px; }
+    .hint { margin: 5px 0; color: var(--muted); font-size: 13px; }
+    button {
+      width: 100%; margin-top: 18px; padding: 11px 14px; border: 0;
+      border-radius: 7px; color: white; background: var(--green);
+      font: inherit; font-weight: 600; cursor: pointer;
+    }
+    button:hover { background: var(--green-dark); }
+    button:disabled { opacity: .6; cursor: wait; }
+    .notice { margin-top: 14px; padding: 11px; border-radius: 7px; background: #f1f5f2; color: var(--muted); font-size: 13px; }
+    .status { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .badge { padding: 4px 9px; border-radius: 20px; background: #edf2ee; color: var(--muted); font-size: 12px; }
+    .badge.running { background: #fff2d6; color: var(--amber); }
+    .badge.done { background: #e4f4e9; color: var(--green-dark); }
+    .badge.error { background: #ffebea; color: var(--red); }
+    .empty { color: var(--muted); padding: 22px 0; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 16px 0; }
+    .metric { padding: 12px; border: 1px solid var(--line); border-radius: 8px; }
+    .metric b { display: block; font-size: 21px; }
+    .metric span { color: var(--muted); font-size: 12px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 9px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+    th { color: var(--muted); font-weight: 600; }
+    .failures { margin-top: 20px; }
+    .failure { padding: 11px 0; border-top: 1px solid var(--line); }
+    .failure strong { color: var(--red); }
+    .failure p { margin: 3px 0; color: var(--muted); font-size: 13px; }
+    details { margin-top: 18px; }
+    pre { max-height: 340px; overflow: auto; padding: 12px; background: #17231d; color: #e0eee4; border-radius: 8px; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    @media (max-width: 760px) {
+      header { padding: 22px 20px; }
+      .layout { grid-template-columns: 1fr; }
+      main { margin-top: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PR12 · Оцінювання AI-функцій</h1>
+    <p>Локальна панель для запуску наборів і перегляду результатів оцінювача.</p>
+  </header>
+  <main>
+    <div class="layout">
+      <section class="card">
+        <h2>Параметри запуску</h2>
+        <label for="target">Що перевіряємо</label>
+        <select id="target">
+          <option value="drafts">Чернетки відповідей · PR11</option>
+          <option value="agent">Помічник з інструментами · PR8</option>
+        </select>
+        <label for="k">Повторів на кейс</label>
+        <input id="k" type="number" min="1" max="3" value="1">
+        <label class="check" id="heldoutRow">
+          <input id="heldout" type="checkbox">
+          <span>Використовувати відкладений набір чернеток</span>
+        </label>
+        <label class="check">
+          <input id="noJudge" type="checkbox" checked>
+          <span>Пропустити AI-суддю</span>
+        </label>
+        <p class="hint">Без судді можна перевірити конвеєр без зовнішнього API. Для справжнього судді потрібні відповідні налаштування у .env.</p>
+        <button id="runButton">Запустити оцінювання</button>
+        <div class="notice">Сервер доступний лише на цьому комп’ютері. Прогін може надсилати запити до моделей і витрачати бюджет, якщо вимкнути режим mock.</div>
+      </section>
+
+      <section class="card">
+        <div class="status">
+          <h2>Результат</h2>
+          <span id="badge" class="badge">Очікування запуску</span>
+        </div>
+        <div id="result"><p class="empty">Виберіть набір ліворуч і запустіть оцінювання.</p></div>
+        <details>
+          <summary>Журнал виконання</summary>
+          <pre id="log">Поки що порожньо.</pre>
+        </details>
+      </section>
+    </div>
+  </main>
+  <script>
+    const target = document.querySelector("#target");
+    const heldoutRow = document.querySelector("#heldoutRow");
+    const heldout = document.querySelector("#heldout");
+    const noJudge = document.querySelector("#noJudge");
+    const runButton = document.querySelector("#runButton");
+    const badge = document.querySelector("#badge");
+    const result = document.querySelector("#result");
+    const log = document.querySelector("#log");
+    let polling = null;
+
+    function setBadge(status, text) {
+      badge.className = `badge ${status}`;
+      badge.textContent = text;
+    }
+
+    function addCell(row, value, tag = "td") {
+      const cell = document.createElement(tag);
+      cell.textContent = value == null ? "—" : String(value);
+      row.append(cell);
+    }
+
+    function showRun(run, file, error) {
+      result.replaceChildren();
+      const targetNames = { drafts: "Чернетки відповідей · PR11", agent: "Помічник з інструментами · PR8" };
+      const kindNames = {
+        normal: "Звичайні",
+        edge: "Граничні",
+        negative: "Негативні",
+        adversarial: "Адверсарні",
+        разом: "Загалом"
+      };
+      if (error) {
+        const message = document.createElement("p");
+        message.className = "empty";
+        message.textContent = error;
+        result.append(message);
+      }
+      if (!run) return;
+
+      const meta = document.createElement("p");
+      meta.className = "hint";
+      meta.textContent = `${targetNames[run.meta.target] || run.meta.target} · k=${run.meta.k} · ${run.meta.label || "без позначки"} · файл: ${file || "немає"}`;
+      result.append(meta);
+
+      const summary = document.createElement("div");
+      summary.className = "summary";
+      const all = run.summary["разом"] || {};
+      [
+        ["Кейсів", all.cases],
+        ["Усі повтори пройдено", all.pass_all],
+        ["Пройдено принаймні раз", all.pass_any],
+        ["Успішні спроби", `${all.attempts_passed ?? 0}/${all.attempts ?? 0}`],
+        ["Помилки виконання", all.errors],
+        ["Тривалість, с", run.meta.duration_s]
+      ].forEach(([name, value]) => {
+        const metric = document.createElement("div");
+        metric.className = "metric";
+        const number = document.createElement("b");
+        number.textContent = value == null ? "—" : String(value);
+        const caption = document.createElement("span");
+        caption.textContent = name;
+        metric.append(number, caption);
+        summary.append(metric);
+      });
+      result.append(summary);
+
+      const wrap = document.createElement("div");
+      wrap.className = "table-wrap";
+      const table = document.createElement("table");
+      const head = document.createElement("tr");
+      ["Тип", "Кейси", "Усі повтори", "Принаймні раз", "Успішні спроби"].forEach(value => addCell(head, value, "th"));
+      const thead = document.createElement("thead");
+      thead.append(head);
+      const tbody = document.createElement("tbody");
+      Object.entries(run.summary).forEach(([kind, stats]) => {
+        const row = document.createElement("tr");
+        [kindNames[kind] || kind, stats.cases, stats.pass_all, stats.pass_any, `${stats.attempts_passed}/${stats.attempts}`]
+          .forEach(value => addCell(row, value));
+        tbody.append(row);
+      });
+      table.append(thead, tbody);
+      wrap.append(table);
+      result.append(wrap);
+
+      const failures = run.results.filter(item => !item.passed);
+      const section = document.createElement("div");
+      section.className = "failures";
+      const title = document.createElement("h2");
+      title.textContent = `Невдалі спроби: ${failures.length}`;
+      section.append(title);
+      if (!failures.length) {
+        const clean = document.createElement("p");
+        clean.className = "hint";
+        clean.textContent = "Усі перевірки в цьому прогоні пройдено.";
+        section.append(clean);
+      }
+      failures.forEach(item => {
+        const entry = document.createElement("div");
+        entry.className = "failure";
+        const heading = document.createElement("strong");
+        heading.textContent = `${item.id} · ${kindNames[item.kind] || item.kind} · спроба ${item.attempt}`;
+        entry.append(heading);
+        item.checks.filter(check => !check.passed).forEach(check => {
+          const detail = document.createElement("p");
+          detail.textContent = `${check.name}: ${check.detail || "не пройшла"}`;
+          entry.append(detail);
+        });
+        section.append(entry);
+      });
+      result.append(section);
+    }
+
+    async function refresh() {
+      const response = await fetch("/api/status", { cache: "no-store" });
+      const state = await response.json();
+      log.textContent = state.output || "Поки що порожньо.";
+      runButton.disabled = state.running;
+      if (state.running) {
+        setBadge("running", "Виконується…");
+      } else if (state.status === "done") {
+        setBadge("done", "Завершено");
+        showRun(state.run, state.run_file, state.error);
+        clearInterval(polling);
+        polling = null;
+      } else if (state.status === "error") {
+        setBadge("error", "Помилка");
+        showRun(state.run, state.run_file, state.error);
+        clearInterval(polling);
+        polling = null;
+      }
+      return state;
+    }
+
+    target.addEventListener("change", () => {
+      const isDrafts = target.value === "drafts";
+      heldoutRow.hidden = !isDrafts;
+      if (!isDrafts) heldout.checked = false;
+    });
+
+    runButton.addEventListener("click", async () => {
+      runButton.disabled = true;
+      result.replaceChildren();
+      setBadge("running", "Запуск…");
+      log.textContent = "Запускаю оцінювання…";
+      try {
+        const response = await fetch("/api/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            target: target.value,
+            k: Number(document.querySelector("#k").value),
+            heldout: heldout.checked,
+            no_judge: noJudge.checked
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Не вдалося запустити оцінювання.");
+        await refresh();
+        if (!polling) polling = setInterval(() => refresh().catch(error => {
+          setBadge("error", "Помилка з’єднання");
+          log.textContent = error.message;
+          clearInterval(polling);
+          polling = null;
+        }), 1000);
+      } catch (error) {
+        runButton.disabled = false;
+        setBadge("error", "Помилка");
+        result.textContent = error.message;
+      }
+    });
+
+    fetch("/api/status").then(response => response.json()).then(state => {
+      if (state.status !== "idle") {
+        refresh().then(current => {
+          if (current.running && !polling) polling = setInterval(() => refresh(), 1000);
+        });
+      }
+    }).catch(() => {});
+  </script>
+</body>
+</html>
