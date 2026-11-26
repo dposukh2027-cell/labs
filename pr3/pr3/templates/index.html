@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Support Assistant</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Помічник служби підтримки</h1>
+      <form id="support-form">
+        <label for="message">Ваше звернення</label>
+        <textarea id="message" rows="6" placeholder="Наприклад: Я отримав замовлення, але термін доставки перевищив 5 днів..."></textarea>
+
+        <div class="row">
+          <div>
+            <label for="temperature">Temperature</label>
+            <input id="temperature" type="number" step="0.1" min="0" max="2" value="0.2" />
+          </div>
+          <div>
+            <label for="top_p">Top-p</label>
+            <input id="top_p" type="number" step="0.1" min="0" max="1" value="0.9" />
+          </div>
+          <div>
+            <label for="max_tokens">Max tokens</label>
+            <input id="max_tokens" type="number" step="10" min="50" max="500" value="250" />
+          </div>
+        </div>
+
+        <button type="submit">Отримати відповідь</button>
+      </form>
+
+      <div id="status" class="status"></div>
+      <div id="answer-box" class="answer-box hidden">
+        <h2>Відповідь</h2>
+        <p id="answer-text"></p>
+        <div class="meta">
+          <span id="model-name"></span>
+          <span id="time-info"></span>
+        </div>
+      </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
