@@ -1,0 +1,62 @@
+[
+  {
+    "query": "Як повернути гроші за товар?",
+    "expected_document": "returns-policy.md",
+    "filters": {"product": "general"}
+  },
+  {
+    "query": "Де сервісний центр для ремонту навушників?",
+    "expected_document": "service-centers.md",
+    "filters": {"product": "headphones"}
+  },
+  {
+    "query": "Яка політика повернення коштів?",
+    "expected_document": "returns-policy.md",
+    "filters": {"category": "policy"}
+  },
+  {
+    "query": "Як заряджати пристрій?",
+    "expected_document": "headphones-manual.md",
+    "filters": {"product": "headphones"}
+  },
+  {
+    "query": "Повернення коштів протягом 7 днів",
+    "expected_document": "returns-policy.md",
+    "filters": {"category": "policy"}
+  },
+  {
+    "query": "Проблема з оплатою через помилку OR-X2-BLK",
+    "expected_document": "error-codes.md",
+    "filters": {"product": "headphones"}
+  },
+  {
+    "query": "Як змінити налаштування підключення?",
+    "expected_document": "headphones-manual.md",
+    "filters": {"product": "headphones"}
+  },
+  {
+    "query": "I need to refund my order",
+    "expected_document": "returns-policy.md",
+    "filters": {"category": "policy"}
+  },
+  {
+    "query": "Кредит на автомобіль для малого бізнесу",
+    "expected_document": "not-found.md",
+    "filters": {"category": "finance"}
+  },
+  {
+    "query": "Повідомлення про доставку",
+    "expected_document": "delivery-policy.md",
+    "filters": {"category": "shipping"}
+  },
+  {
+    "query": "Як активувати гарантію?",
+    "expected_document": "warranty-policy.md",
+    "filters": {"status": "active"}
+  },
+  {
+    "query": "Скільки часу триває доставка?",
+    "expected_document": "delivery-policy.md",
+    "filters": {"category": "shipping"}
+  }
+]

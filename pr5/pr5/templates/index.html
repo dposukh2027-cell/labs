@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Semantic Search</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: #f7f7fb;
+        color: #1d1d1d;
+      }
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      h1 {
+        margin-bottom: 12px;
+      }
+      .panel {
+        background: white;
+        border-radius: 10px;
+        padding: 18px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        margin-bottom: 18px;
+      }
+      form {
+        display: grid;
+        grid-template-columns: 2fr repeat(4, 1fr) 120px 110px;
+        gap: 12px;
+        align-items: end;
+      }
+      input, button, select {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 6px;
+        border: 1px solid #d4d7de;
+        font-size: 14px;
+      }
+      button {
+        background: #2354d1;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      .results {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+      .result-block {
+        background: white;
+        border-radius: 10px;
+        padding: 16px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      }
+      .meta {
+        font-size: 12px;
+        color: #4a4a4a;
+        margin-bottom: 8px;
+      }
+      .score {
+        font-weight: bold;
+        color: #2354d1;
+      }
+      .result-item {
+        border-top: 1px solid #ececec;
+        padding-top: 12px;
+        margin-top: 12px;
+      }
+      .fragment {
+        white-space: pre-wrap;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .status {
+        font-size: 14px;
+        margin-bottom: 12px;
+      }
+      @media (max-width: 980px) {
+        form, .results {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Семантичний пошук по базі знань «Сузірʼя»</h1>
+      <div class="status">
+        {% if index_ready %}
+          <strong>Індекс готовий:</strong> {{ model_name }}
+        {% else %}
+          <strong>Індекс не знайдено.</strong> Запустіть <code>python scripts/build_index.py</code>.
+        {% endif %}
+      </div>
+
+      <div class="panel">
+        <form id="searchForm">
+          <input id="query" name="query" type="text" placeholder="Введіть запит..." value="" />
+          <input id="top_k" name="top_k" type="number" min="1" max="20" value="5" />
+          <input id="threshold" name="threshold" type="number" step="0.01" min="0" max="1" value="0.25" />
+          <input id="category" name="category" type="text" placeholder="Категорія" />
+          <input id="product" name="product" type="text" placeholder="Товар" />
+          <input id="audience" name="audience" type="text" placeholder="Аудиторія" />
+          <input id="status" name="status" type="text" placeholder="Статус" />
+          <button type="submit">Пошук</button>
+        </form>
+      </div>
+
+      <div class="results">
+        <div class="result-block">
+          <h2>Semantic search</h2>
+          <div id="semanticResults"></div>
+        </div>
+        <div class="result-block">
+          <h2>Keyword search</h2>
+          <div id="keywordResults"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById('searchForm');
+      const semanticResults = document.getElementById('semanticResults');
+      const keywordResults = document.getElementById('keywordResults');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData);
+
+        try {
+          const response = await fetch('/search', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Request failed');
+          }
+
+          const data = await response.json();
+          renderResults('semantic', data.semantic, data.semantic_time_ms);
+          renderResults('keywords', data.keywords, data.keyword_time_ms);
+        } catch (error) {
+          semanticResults.innerHTML = `<div class="result-item"><strong>Помилка:</strong> ${error.message}</div>`;
+          keywordResults.innerHTML = `<div class="result-item"><strong>Помилка:</strong> ${error.message}</div>`;
+        }
+      });
+
+      function renderResults(kind, items, timeMs) {
+        const container = kind === 'semantic' ? semanticResults : keywordResults;
+        if (!items || items.length === 0) {
+          container.innerHTML = `<div class="result-item">Нічого не знайдено.</div>`;
+          return;
+        }
+
+        container.innerHTML = `<div class="meta">Час пошуку: ${timeMs} ms</div>`;
+        items.forEach((item, idx) => {
+          const metadata = item.metadata || {};
+          container.innerHTML += `
+            <div class="result-item">
+              <div class="meta">#${idx + 1} • ${metadata.category || 'unknown'} • ${metadata.product || 'unknown'} • ${metadata.audience || 'public'} • ${metadata.status || 'active'}</div>
+              <div><span class="score">Score:</span> ${item.score.toFixed(4)}</div>
+              <div><strong>${item.title || item.document || 'Unknown document'}</strong></div>
+              <div class="meta">${item.document || 'unknown'} • ${item.source || ''}</div>
+              <div class="fragment">${escapeHtml(item.fragment)}</div>
+            </div>
+          `;
+        });
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+    </script>
+  </body>
+</html>

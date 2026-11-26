@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+.venv/
+.idea/
+.DS_Store
+*.npy
+*.npz
+/data/
+/compare/results.json
