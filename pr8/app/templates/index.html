@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>Сузір'я — помічник клієнта</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #172033;
+      background: #f5f7fb;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --muted: #68748a;
+      --line: #e4e9f1;
+      --blue: #4361ee;
+      --blue-dark: #334ed0;
+      --panel: #fff;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #f5f7fb; }
+    button, textarea, select { font: inherit; }
+    .page { width: min(100% - 32px, 1040px); margin: 0 auto; padding: 28px 0 64px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 42px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 750; letter-spacing: -.02em; }
+    .brand-mark { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 14px; color: #fff; background: linear-gradient(140deg, #6678f3, #4557dc); box-shadow: 0 6px 16px #4557dc38; font-size: 20px; }
+    .brand small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; font-weight: 500; letter-spacing: 0; }
+    .connection { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: #4a5870; font-size: 12px; }
+    .connection::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #f0ad43; }
+    .connection.online::before { background: #24b47e; }
+    .intro { max-width: 720px; margin: 0 auto 26px; text-align: center; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 12px; color: var(--blue); font-size: 12px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(30px, 5vw, 46px); line-height: 1.12; letter-spacing: -.045em; }
+    .intro p { max-width: 570px; margin: 14px auto 0; color: var(--muted); font-size: 15px; line-height: 1.7; }
+    .workspace { max-width: 780px; margin: 0 auto; }
+    .composer, .answer-card, .section-card { border: 1px solid var(--line); border-radius: 20px; background: var(--panel); box-shadow: 0 12px 35px #20345b0a; }
+    .composer { padding: 18px; }
+    .composer-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .customer-label { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .select-wrap { display: flex; align-items: center; gap: 9px; }
+    select { max-width: min(68vw, 310px); padding: 9px 34px 9px 12px; border: 1px solid var(--line); border-radius: 11px; outline: none; background: #fff; color: #263248; font-size: 13px; }
+    select:focus, textarea:focus { border-color: #9aa8ff; box-shadow: 0 0 0 3px #4361ee17; }
+    .reset { border: 0; padding: 7px 9px; border-radius: 9px; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; }
+    .reset:hover { background: #f2f4f8; color: #263248; }
+    textarea { display: block; width: 100%; min-height: 94px; resize: vertical; padding: 14px; border: 1px solid var(--line); border-radius: 14px; outline: none; color: #172033; line-height: 1.55; }
+    textarea::placeholder { color: #9aa4b5; }
+    .composer-bottom { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; }
+    .hint { color: #8791a3; font-size: 12px; }
+    .send { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 42px; padding: 0 18px; border: 0; border-radius: 12px; background: var(--blue); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 5px 12px #4361ee35; transition: background .15s, transform .15s; }
+    .send:hover { background: var(--blue-dark); transform: translateY(-1px); }
+    .send:disabled { opacity: .65; cursor: wait; transform: none; }
+    .send .arrow { font-size: 17px; line-height: 1; }
+    .suggestions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 15px 0 28px; }
+    .suggestion { padding: 8px 12px; border: 1px solid #e6eaf2; border-radius: 999px; background: #fff; color: #56637a; font-size: 12px; cursor: pointer; transition: border-color .15s, color .15s; }
+    .suggestion:hover { border-color: #aab5ff; color: var(--blue); }
+    .answer-card { min-height: 174px; padding: 20px 22px; }
+    .answer-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; color: #3b4860; font-size: 13px; font-weight: 750; }
+    .assistant-icon { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 10px; background: #eef0ff; color: var(--blue); }
+    #answer { color: #263248; font-size: 15px; line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; }
+    #answer.placeholder { color: #8994a6; }
+    #answer.error { color: #a53434; }
+    .loading { display: flex; align-items: center; gap: 10px; color: #64718a; }
+    .spinner { width: 17px; height: 17px; border: 2px solid #dfe4ff; border-top-color: var(--blue); border-radius: 50%; animation: spin .75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .meta-line { min-height: 20px; margin: 10px 4px 0; color: #8791a3; font-size: 11px; line-height: 1.6; }
+    .section-card { margin-top: 22px; overflow: hidden; }
+    details > summary { display: flex; align-items: center; justify-content: space-between; padding: 16px 19px; color: #46536b; font-size: 13px; font-weight: 700; cursor: pointer; list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::after { content: "+"; color: #8490a4; font-size: 19px; font-weight: 400; }
+    details[open] > summary::after { content: "−"; }
+    .details-content { padding: 0 19px 16px; }
+    .empty { color: #8994a6; font-size: 13px; }
+    .call { margin-top: 10px; padding: 13px; border: 1px solid var(--line); border-radius: 13px; background: #fbfcfe; font-size: 12px; }
+    .call .head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .call .name { color: #2e3b52; font-family: ui-monospace, monospace; font-weight: 700; }
+    .call .round, .call .time { color: #8791a3; font-size: 11px; }
+    .call .time { margin-left: auto; }
+    .call .reason { margin-top: 8px; color: #8d5a17; }
+    .call pre, .tool pre { margin: 5px 0 0; padding: 9px; overflow: auto; border-radius: 9px; background: #f0f3f8; color: #46536b; font-size: 11px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .call .label { margin-top: 10px; color: #8791a3; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+    .badge { padding: 3px 8px; border-radius: 999px; background: #edf0f5; color: #5c687d; font-size: 10px; }
+    .badge.ok { background: #e4f7ef; color: #18764f; }
+    .badge.rejected { background: #fff1dc; color: #99620e; }
+    .badge.error { background: #fde9e8; color: #ad3734; }
+    .tool { margin-top: 12px; padding-left: 12px; border-left: 2px solid #dfe4f1; color: #657187; font-size: 12px; line-height: 1.55; }
+    .tool .name { color: #34425b; font-family: ui-monospace, monospace; font-weight: 700; }
+    footer { margin-top: 26px; color: #99a2b1; font-size: 11px; text-align: center; }
+    @media (max-width: 560px) {
+      .page { width: min(100% - 22px, 1040px); padding-top: 16px; }
+      .topbar { margin-bottom: 34px; }
+      .connection { padding: 7px 9px; font-size: 10px; }
+      .composer { padding: 13px; border-radius: 16px; }
+      .answer-card { padding: 17px; border-radius: 16px; }
+      .composer-bottom { align-items: flex-end; }
+      .hint { max-width: 175px; line-height: 1.4; }
+      .send { padding: 0 13px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span>Сузір'я<small>служба підтримки</small></span>
+      </div>
+      <div class="connection" id="connection">перевіряю з'єднання</div>
+    </header>
+
+    <section class="intro">
+      <div class="eyebrow">✦ &nbsp; помічник клієнта</div>
+      <h1>Чим можемо допомогти?</h1>
+      <p>Запитайте про замовлення, товар, наявність, доставку чи повернення. Перевірю дані магазину й підготую відповідь.</p>
+    </section>
+
+    <div class="workspace">
+      <form class="composer" id="form">
+        <div class="composer-top">
+          <div class="select-wrap">
+            <label class="customer-label" for="customer">КЛІЄНТ</label>
+            <select id="customer" aria-label="Оберіть клієнта">
+              <option value="">Завантажую клієнтів…</option>
+            </select>
+          </div>
+          <button type="button" class="reset" id="reset" title="Повернути дані магазину до початкового стану">Скинути тестові дані</button>
+        </div>
+        <textarea id="question" placeholder="Наприклад: Де моє замовлення 10458?" required></textarea>
+        <div class="composer-bottom">
+          <span class="hint">Enter — надіслати · Shift + Enter — новий рядок</span>
+          <button type="submit" class="send" id="send"><span>Запитати</span><span class="arrow" aria-hidden="true">→</span></button>
+        </div>
+      </form>
+
+      <div class="suggestions" aria-label="Приклади запитань">
+        <button type="button" class="suggestion">Де моє замовлення?</button>
+        <button type="button" class="suggestion">Перевір наявність товару</button>
+        <button type="button" class="suggestion">Скільки коштує доставка?</button>
+        <button type="button" class="suggestion">Хочу оформити повернення</button>
+      </div>
+
+      <section class="answer-card" aria-live="polite" aria-busy="false" id="answer-card">
+        <div class="answer-heading"><span class="assistant-icon" aria-hidden="true">✦</span> Відповідь помічника</div>
+        <div id="answer" class="placeholder">Ваша відповідь з'явиться тут. Напишіть запитання, щоб почати.</div>
+      </section>
+      <div class="meta-line" id="meta" aria-live="polite"></div>
+
+      <details class="section-card">
+        <summary>Як сформовано відповідь · журнал інструментів</summary>
+        <div class="details-content" id="calls"><div class="empty">Виклики інструментів з'являться після запиту.</div></div>
+      </details>
+
+      <details class="section-card" id="tools-box">
+        <summary>Інструменти помічника</summary>
+        <div class="details-content" id="tools"><div class="empty">Завантажую…</div></div>
+      </details>
+    </div>
+    <footer>Помічник перевіряє актуальні дані магазину перед відповіддю.</footer>
+  </main>
+
+  <script>
+    const form = document.getElementById('form');
+    const send = document.getElementById('send');
+    const customerSelect = document.getElementById('customer');
+    const questionInput = document.getElementById('question');
+    const answerBox = document.getElementById('answer');
+    const answerCard = document.getElementById('answer-card');
+    const callsBox = document.getElementById('calls');
+    const toolsBox = document.getElementById('tools');
+    const meta = document.getElementById('meta');
+    const connection = document.getElementById('connection');
+    const STATUS_TEXT = { ok: 'виконано', rejected: 'відхилено', error: 'помилка' };
+
+    function pretty(value) {
+      if (value === null || value === undefined) return '';
+      if (typeof value === 'string') {
+        try { return JSON.stringify(JSON.parse(value), null, 2); } catch { return value; }
+      }
+      return JSON.stringify(value, null, 2);
+    }
+
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function showError(message) {
+      answerCard.setAttribute('aria-busy', 'false');
+      answerBox.className = 'error';
+      answerBox.textContent = message;
+      meta.textContent = '';
+    }
+
+    async function loadCustomers() {
+      try {
+        const response = await fetch('/api/customers');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const list = await response.json();
+        customerSelect.replaceChildren();
+        for (const customer of list) {
+          const option = el('option', '', `${customer.name} · ${customer.city}`);
+          option.value = customer.customer_id;
+          customerSelect.appendChild(option);
+        }
+        if (!list.length) throw new Error('Список клієнтів порожній');
+        connection.textContent = 'застосунок підключено';
+        connection.classList.add('online');
+      } catch {
+        customerSelect.replaceChildren(el('option', '', 'Не вдалося завантажити'));
+        connection.textContent = 'немає з’єднання';
+        connection.classList.remove('online');
+      }
+    }
+
+    async function loadTools() {
+      try {
+        const response = await fetch('/api/tools');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const list = await response.json();
+        toolsBox.replaceChildren();
+        if (!list.length) {
+          toolsBox.appendChild(el('div', 'empty', 'Немає доступних інструментів.'));
+          return;
+        }
+        for (const item of list) {
+          const tool = item.function || item;
+          const div = el('div', 'tool');
+          div.appendChild(el('div', 'name', tool.name || 'інструмент'));
+          if (tool.description) div.appendChild(el('div', '', tool.description));
+          if (tool.parameters) div.appendChild(el('pre', '', pretty(tool.parameters)));
+          toolsBox.appendChild(div);
+        }
+      } catch {
+        toolsBox.replaceChildren(el('div', 'empty', 'Не вдалося завантажити описи інструментів.'));
+      }
+    }
+
+    function renderCalls(calls) {
+      callsBox.replaceChildren();
+      if (!calls || !calls.length) {
+        callsBox.appendChild(el('div', 'empty', 'Для цієї відповіді інструменти не викликалися.'));
+        return;
+      }
+      for (const call of calls) {
+        const div = el('div', 'call');
+        const head = el('div', 'head');
+        head.appendChild(el('span', 'name', call.name));
+        head.appendChild(el('span', `badge ${call.status}`, STATUS_TEXT[call.status] || call.status));
+        if (call.round !== undefined) head.appendChild(el('span', 'round', `звертання ${call.round}`));
+        if (typeof call.elapsed === 'number') head.appendChild(el('span', 'time', `${(call.elapsed * 1000).toFixed(0)} мс`));
+        div.appendChild(head);
+        if (call.reason) div.appendChild(el('div', 'reason', call.reason));
+        div.appendChild(el('div', 'label', 'аргументи'));
+        div.appendChild(el('pre', '', pretty(call.arguments) || '—'));
+        if (call.result !== null && call.result !== undefined) {
+          div.appendChild(el('div', 'label', 'результат перевірки'));
+          div.appendChild(el('pre', '', pretty(call.result)));
+        }
+        callsBox.appendChild(div);
+      }
+    }
+
+    function renderMeta(data) {
+      const parts = [];
+      if (data.model) parts.push(`модель: ${data.model}`);
+      if (data.rounds !== undefined) parts.push(`звертань: ${data.rounds}`);
+      const elapsed = data.elapsed || {};
+      if (elapsed.model !== undefined) parts.push(`час відповіді: ${Number(elapsed.model).toFixed(2)} с`);
+      if (data.usage) parts.push(`токени: ${data.usage.prompt_tokens ?? '?'} запит / ${data.usage.completion_tokens ?? '?'} відповідь`);
+      meta.textContent = parts.join(' · ');
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const question = questionInput.value.trim();
+      if (!question) {
+        questionInput.focus();
+        showError('Напишіть запитання, і я допоможу.');
+        return;
+      }
+      if (!customerSelect.value) {
+        showError('Не вдалося визначити клієнта. Перевірте, чи запущений застосунок, і оновіть сторінку.');
+        return;
+      }
+
+      send.disabled = true;
+      send.querySelector('span').textContent = 'Готую відповідь…';
+      answerCard.setAttribute('aria-busy', 'true');
+      answerBox.className = '';
+      answerBox.innerHTML = '';
+      const loading = el('div', 'loading');
+      loading.appendChild(el('span', 'spinner'));
+      loading.appendChild(el('span', '', 'Перевіряю запит і готую відповідь…'));
+      answerBox.appendChild(loading);
+      callsBox.replaceChildren(el('div', 'empty', 'Чекаю на результат…'));
+      meta.textContent = '';
+
+      try {
+        const response = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customer_id: customerSelect.value, question }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const detail = typeof data.detail === 'string' ? data.detail : `Помилка сервера (${response.status}).`;
+          showError(detail);
+          callsBox.replaceChildren(el('div', 'empty', 'Виклики не повернулися.'));
+          return;
+        }
+        answerCard.setAttribute('aria-busy', 'false');
+        answerBox.className = '';
+        answerBox.textContent = data.answer || 'На жаль, відповідь порожня. Спробуйте переформулювати запит.';
+        renderCalls(data.calls);
+        renderMeta(data);
+        if (data.stopped === 'limit') meta.textContent += (meta.textContent ? ' · ' : '') + 'Досягнуто ліміту кроків';
+      } catch {
+        showError('Не вдалося зв’язатися із застосунком. Сервер міг зупинитися — запустіть задачу «Запустити помічника» у VS Code.');
+        callsBox.replaceChildren(el('div', 'empty', 'Виклики не повернулися.'));
+        connection.textContent = 'немає з’єднання';
+        connection.classList.remove('online');
+      } finally {
+        send.disabled = false;
+        send.querySelector('span').textContent = 'Запитати';
+      }
+    });
+
+    questionInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
+
+    document.querySelectorAll('.suggestion').forEach((button) => {
+      button.addEventListener('click', () => {
+        questionInput.value = button.textContent.trim();
+        questionInput.focus();
+      });
+    });
+
+    document.getElementById('reset').addEventListener('click', async () => {
+      const button = document.getElementById('reset');
+      button.disabled = true;
+      try {
+        const response = await fetch('/api/reset', { method: 'POST' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        meta.textContent = 'Тестові дані повернуто до початкового стану.';
+      } catch {
+        meta.textContent = 'Не вдалося скинути дані. Перевірте з’єднання із застосунком.';
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    loadCustomers();
+    loadTools();
+  </script>
+</body>
+</html>
