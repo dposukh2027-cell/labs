@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Local YOLO Inference"
+description = "A web application for local object detection with a pretrained Ultralytics YOLO model. Upload an image, adjust the confidence threshold, inspect bounding boxes and confidence values, measure inference time, and review a seven-image evaluation set with error notes."
+version = "1.0.0"
+id = "artifacts/local-inference"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22696
+
+[services.development]
+run = "pnpm --filter @workspace/local-inference run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/local-inference", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/local-inference/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22696"
+BASE_PATH = "/"
