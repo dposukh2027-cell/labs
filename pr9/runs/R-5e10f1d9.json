@@ -1,0 +1,64 @@
+{
+  "run_id": "R-5e10f1d9",
+  "customer_id": "C-1002",
+  "text": "Хочу повернути роутер, він мені не підійшов.",
+  "status": "needs_info",
+  "route": "return",
+  "steps": [
+    {
+      "n": 1,
+      "name": "parse",
+      "kind": "model",
+      "status": "ok",
+      "detail": "звернення розібрано",
+      "input": {
+        "text": "Хочу повернути роутер, він мені не підійшов."
+      },
+      "output": {
+        "kind": "return",
+        "order_id": null,
+        "item": null,
+        "reason": "not_suitable"
+      },
+      "elapsed": null,
+      "usage": null,
+      "at": "2026-11-05T12:56:49.934449+00:00"
+    },
+    {
+      "n": 2,
+      "name": "lookup",
+      "kind": "code",
+      "status": "waiting",
+      "detail": "бракує номера замовлення",
+      "input": null,
+      "output": {
+        "missing": "order_id"
+      },
+      "elapsed": null,
+      "usage": null,
+      "at": "2026-11-05T12:56:49.934449+00:00"
+    }
+  ],
+  "data": {
+    "parsed": {
+      "kind": "return",
+      "order_id": null,
+      "item": null,
+      "reason": "not_suitable"
+    }
+  },
+  "pending": null,
+  "decision": null,
+  "reply": "Для продовження вкажіть номер замовлення, яке стосується звернення.",
+  "stopped": null,
+  "usage": {
+    "model": 0,
+    "tools": 0
+  },
+  "elapsed": {
+    "model": 0.0,
+    "tools": 0.0
+  },
+  "created_at": "2026-11-05T12:56:49.934449+00:00",
+  "updated_at": "2026-11-05T12:56:49.934449+00:00"
+}

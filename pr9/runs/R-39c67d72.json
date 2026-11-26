@@ -1,0 +1,152 @@
+{
+  "run_id": "R-39c67d72",
+  "customer_id": "C-1003",
+  "text": "Хочу повернути робот-пилосос із замовлення 10412. Він мені не підійшов.",
+  "status": "done",
+  "route": "return",
+  "steps": [
+    {
+      "n": 1,
+      "name": "parse",
+      "kind": "model",
+      "status": "ok",
+      "detail": "звернення розібрано",
+      "input": {
+        "text": "Хочу повернути робот-пилосос із замовлення 10412. Він мені не підійшов."
+      },
+      "output": {
+        "kind": "return",
+        "order_id": "10412",
+        "item": null,
+        "reason": "not_suitable"
+      },
+      "elapsed": null,
+      "usage": null,
+      "at": "2026-11-05T12:49:14.428781+00:00"
+    },
+    {
+      "n": 2,
+      "name": "approval",
+      "kind": "human",
+      "status": "waiting",
+      "detail": "передано на підтвердження оператора",
+      "input": null,
+      "output": {
+        "summary": "Оформити повернення товару Робот-пилосос «Сіріус R10» із замовлення 10412",
+        "tool": "create_return",
+        "arguments": {
+          "order_id": "10412",
+          "sku": "SIR-R10",
+          "reason": "not_suitable",
+          "quantity": 1,
+          "comment": "Хочу повернути робот-пилосос із замовлення 10412. Він мені не підійшов."
+        },
+        "grounds": [
+          "замовлення належить клієнту",
+          "товар є в замовленні",
+          "поточний статус дозволяє повернення"
+        ]
+      },
+      "elapsed": null,
+      "usage": null,
+      "at": "2026-11-05T12:49:14.428781+00:00"
+    },
+    {
+      "n": 3,
+      "name": "decision",
+      "kind": "human",
+      "status": "ok",
+      "detail": "ok",
+      "input": {
+        "approve": true,
+        "comment": "ok"
+      },
+      "output": null,
+      "elapsed": null,
+      "usage": null,
+      "at": "2026-11-05T12:49:14.431551+00:00"
+    },
+    {
+      "n": 4,
+      "name": "create_return",
+      "kind": "tool",
+      "status": "ok",
+      "detail": "дія виконана рівно один раз",
+      "input": {
+        "order_id": "10412",
+        "sku": "SIR-R10",
+        "reason": "not_suitable",
+        "quantity": 1,
+        "comment": "Хочу повернути робот-пилосос із замовлення 10412. Він мені не підійшов."
+      },
+      "output": {
+        "result": "Заявка R-5001 на повернення оформлена успішно."
+      },
+      "elapsed": null,
+      "usage": null,
+      "at": "2026-11-05T12:49:14.431551+00:00"
+    }
+  ],
+  "data": {
+    "parsed": {
+      "kind": "return",
+      "order_id": "10412",
+      "item": null,
+      "reason": "not_suitable"
+    },
+    "order": {
+      "order_id": "10412",
+      "customer_id": "C-1003",
+      "created_at": "2026-09-25",
+      "status": "delivered",
+      "items": [
+        {
+          "sku": "SIR-R10",
+          "name": "Робот-пилосос «Сіріус R10»",
+          "quantity": 1,
+          "price": "12999.00"
+        },
+        {
+          "sku": "SIR-F3",
+          "name": "Фільтри для «Сіріус R10», 3 шт.",
+          "quantity": 2,
+          "price": "449.00"
+        }
+      ],
+      "total": "13897.00",
+      "delivery": {
+        "method": "pickup",
+        "carrier": null,
+        "city": "Кременчук",
+        "point": "Склад, вул. Промислова, 7",
+        "tracking": null,
+        "delivered_at": "2026-09-29",
+        "cost": "0.00"
+      },
+      "payment": {
+        "method": "installments",
+        "card_last4": "3095",
+        "paid": true
+      },
+      "internal_note": "",
+      "status_label": "Виконано"
+    }
+  },
+  "pending": null,
+  "decision": {
+    "approve": true,
+    "comment": "ok"
+  },
+  "reply": "Заявка R-5001 на повернення оформлена успішно.",
+  "stopped": null,
+  "usage": {
+    "model": 0,
+    "tools": 0
+  },
+  "elapsed": {
+    "model": 0.0,
+    "tools": 0.0
+  },
+  "created_at": "2026-11-05T12:49:14.428781+00:00",
+  "updated_at": "2026-11-05T12:49:14.431551+00:00"
+}

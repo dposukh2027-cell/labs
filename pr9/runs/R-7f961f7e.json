@@ -1,0 +1,101 @@
+{
+  "run_id": "R-7f961f7e",
+  "customer_id": "C-1001",
+  "text": "Я хочу дізнатися, чи в мене замовлення 10458 вже доставили?",
+  "status": "done",
+  "route": "status",
+  "steps": [
+    {
+      "n": 1,
+      "name": "parse",
+      "kind": "model",
+      "status": "ok",
+      "detail": "звернення розібрано",
+      "input": {
+        "text": "Я хочу дізнатися, чи в мене замовлення 10458 вже доставили?"
+      },
+      "output": {
+        "kind": "status",
+        "order_id": "10458",
+        "item": null,
+        "reason": null
+      },
+      "elapsed": null,
+      "usage": null,
+      "at": "2026-11-05T12:50:29.979037+00:00"
+    },
+    {
+      "n": 2,
+      "name": "reply",
+      "kind": "model",
+      "status": "ok",
+      "detail": "запит про статус оброблено",
+      "input": null,
+      "output": {
+        "reply": "Статус замовлення 10458 — Передано в доставку."
+      },
+      "elapsed": null,
+      "usage": null,
+      "at": "2026-11-05T12:50:29.979037+00:00"
+    }
+  ],
+  "data": {
+    "parsed": {
+      "kind": "status",
+      "order_id": "10458",
+      "item": null,
+      "reason": null
+    },
+    "order": {
+      "order_id": "10458",
+      "customer_id": "C-1001",
+      "created_at": "2026-10-03",
+      "status": "shipped",
+      "items": [
+        {
+          "sku": "VEGA-S",
+          "name": "Смарт-годинник «Вега S»",
+          "quantity": 1,
+          "price": "5499.00"
+        },
+        {
+          "sku": "VEGA-STRAP",
+          "name": "Ремінець для «Вега S», силікон",
+          "quantity": 1,
+          "price": "399.00"
+        }
+      ],
+      "total": "5898.00",
+      "delivery": {
+        "method": "branch",
+        "carrier": "Нова пошта",
+        "city": "Київ",
+        "point": "Відділення № 12",
+        "tracking": "20450012345678",
+        "delivered_at": null,
+        "cost": "0.00"
+      },
+      "payment": {
+        "method": "card",
+        "card_last4": "4417",
+        "paid": true
+      },
+      "internal_note": "",
+      "status_label": "Передано в доставку"
+    }
+  },
+  "pending": null,
+  "decision": null,
+  "reply": "Статус замовлення 10458 — Передано в доставку.",
+  "stopped": null,
+  "usage": {
+    "model": 0,
+    "tools": 0
+  },
+  "elapsed": {
+    "model": 0.0,
+    "tools": 0.0
+  },
+  "created_at": "2026-11-05T12:50:29.978033+00:00",
+  "updated_at": "2026-11-05T12:50:29.979037+00:00"
+}

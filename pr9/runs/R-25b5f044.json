@@ -1,0 +1,64 @@
+{
+  "run_id": "R-25b5f044",
+  "customer_id": "C-1001",
+  "text": "Я хочу дізнатися, чи в мене замовлення 10458 вже доставили?",
+  "status": "handed_off",
+  "route": "other",
+  "steps": [
+    {
+      "n": 1,
+      "name": "parse",
+      "kind": "model",
+      "status": "ok",
+      "detail": "звернення розібрано",
+      "input": {
+        "text": "Я хочу дізнатися, чи в мене замовлення 10458 вже доставили?"
+      },
+      "output": {
+        "kind": "other",
+        "order_id": "10458",
+        "item": null,
+        "reason": null
+      },
+      "elapsed": null,
+      "usage": null,
+      "at": "2026-11-05T12:49:48.671740+00:00"
+    },
+    {
+      "n": 2,
+      "name": "route",
+      "kind": "code",
+      "status": "ok",
+      "detail": "звернення передано оператору вручну",
+      "input": null,
+      "output": {
+        "route": "other"
+      },
+      "elapsed": null,
+      "usage": null,
+      "at": "2026-11-05T12:49:48.671740+00:00"
+    }
+  ],
+  "data": {
+    "parsed": {
+      "kind": "other",
+      "order_id": "10458",
+      "item": null,
+      "reason": null
+    }
+  },
+  "pending": null,
+  "decision": null,
+  "reply": "Це звернення не входить у автоматичну схему обробки. Оператор розбереться з ним вручну.",
+  "stopped": null,
+  "usage": {
+    "model": 0,
+    "tools": 0
+  },
+  "elapsed": {
+    "model": 0.0,
+    "tools": 0.0
+  },
+  "created_at": "2026-11-05T12:49:48.671740+00:00",
+  "updated_at": "2026-11-05T12:49:48.671740+00:00"
+}
